@@ -1,17 +1,38 @@
 const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcrypt")
+const multer = require("multer")
+const path = require("path")
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersSchema")
 
-router.post("/signup", async (req, res) => {
+const storage = multer.diskStorage({
+    destination: "../client/public/uploads",
+    filename:(req, file, cb) => {
+        cb(null, file.fieldname+"_"+Date.now()+path.extname(file.originalname))
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    const allowedFileTypes = ["image/jpeg", "image/jpg", "image/png"]
+    if(allowedFileTypes.includes(file.mimetype)){
+        cb(null, true)
+    }else{
+        cb(null, false)
+    }
+}
+
+const upload = multer({storage, fileFilter})
+
+router.post("/signup", upload.single("profileImage"), async (req, res) => {
     try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             const user = new User({
                 fullName: req.body.fullName,
                 email: req.body.email,
                 password: hashedPassword,
-                isVerified: req.body.isVerified
+                isVerified: req.body.isVerified,
+                profileImage: req.file.filename
             })
         
             await user.save();

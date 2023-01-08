@@ -18,6 +18,10 @@ const usersSchema = mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    profileImage: {
+        type: String,
+        default: "defaultProfile.jpg"
     }
 }) 
 

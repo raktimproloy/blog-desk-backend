@@ -2,13 +2,16 @@ const express = require("express")
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
 const cors = require("cors")
+const path = require("path")
 const usersHandler = require("./routerHandler/usersHandler")
+const blogHandler = require("./routerHandler/blogHandler")
 
 const app = express()
 app.use(express.json())
 app.use(cors({
     origin: ['http://localhost:3000']
 }))
+app.use(express.static(path.join(__dirname, "public")))
 dotenv.config()
 
 mongoose.set('strictQuery', true);
@@ -17,6 +20,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/blog-desk")
     .catch(err => console.log(err.message))
 
 app.use("/users", usersHandler)
+app.use("/blog", blogHandler )
 
 const errorHandler = (err, req, res, next) => {
     if(res.headerSent){
