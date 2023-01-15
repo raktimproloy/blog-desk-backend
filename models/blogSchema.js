@@ -7,22 +7,22 @@ const postBlogSchema = mongoose.Schema({
     title: {
         type: String
     },
-    file: {
+    BlogImageOne: {
         type: String
     },
     firstDescription: {
         type: String
     },
-    secondImage: {
+    BlogImageTwo: {
         type: String
     },
     secondDescription: {
         type: String
     },
-    thirdImage: {
+    BlogImageThree: {
         type: String
     },
-    fourthImage: {
+    BlogImageFour: {
         type: String
     },
     thirdDescription: {

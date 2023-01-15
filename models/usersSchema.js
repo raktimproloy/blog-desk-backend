@@ -20,8 +20,7 @@ const usersSchema = mongoose.Schema({
         default: false
     },
     profileImage: {
-        type: String,
-        default: "defaultProfile.jpg"
+        type: String
     }
 }) 
 

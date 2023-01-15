@@ -2,43 +2,49 @@ const express = require("express")
 const multer = require("multer")
 const PostBlog = require("../models/blogSchema")
 const path = require("path")
+const {v4: uuidv4} = require("uuid")
 const router = express.Router();
 
-const Storage = multer.diskStorage({
-    destination: "../client/public/uploads",
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, "images")
+        // cb(null, "../client/public/uploads")
+    },
     filename:(req, file, cb) => {
-        cb(null, file.fieldname+"_hello"+Date.now()+path.extname(file.originalname))
+        cb(null, uuidv4() +"-"+Date.now()+path.extname(file.originalname))
     }
 })
 
-const upload = multer({
-    storage: Storage,
-    fileFilter: (req, file, cb) => {
-        if(
-            
-            file.mimetype === "image/png" ||
-            file.mimetype === "image/jpg" ||
-            file.mimetype === "image/jpeg"
-        ){
-            console.log("Upload");
-            cb(null, true)
-        }else{
-            console.log("Upload no");
-        }
+const fileFilter = (req, file, cb) => {
+    const allowedFileTypes = ["image/jpeg", "image/jpg", "image/png"]
+    if(allowedFileTypes.includes(file.mimetype)){
+        cb(null, true)
+    }else{
+        cb(null, false)
     }
-}).single("file")
+}
 
-router.post("/post", upload, async (req, res) => {
+const upload = multer({storage, fileFilter, key: function(req, file, cb) {
+    cb(null, file.originalname)
+}})
+
+router.post("/post", upload.fields([
+    {name: "BlogImageOne", maxCount: 1},
+    {name: "BlogImageTwo", maxCount: 1},
+    {name: "BlogImageThree", maxCount: 1},
+    {name: "BlogImageFour", maxCount: 1},
+]), (req, res) => {
     try{
+        console.log("Files",req.files);
         const postBlog = new PostBlog({
-            theme: "Theme One",
+            theme: req.body.theme,
             title: req.body.title,
-            file: req.body.file,
+            BlogImageOne: req.files.BlogImageOne[0].filename,
+            BlogImageTwo: req.files.BlogImageTwo[0].filename,
+            BlogImageThree: req.files.BlogImageThree[0].filename,
+            BlogImageFour: req.files.BlogImageFour[0].filename,
             firstDescription: req.body.firstDescription,
-            secondImage: req.body.secondImage,
             secondDescription: req.body.secondDescription,
-            thirdImage: req.body.thirdImage,
-            fourthImage: req.body.fourthImage,
             thirdDescription: req.body.thirdDescription,
         })
         postBlog.save()

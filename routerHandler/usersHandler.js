@@ -3,13 +3,17 @@ const router = express.Router()
 const bcrypt = require("bcrypt")
 const multer = require("multer")
 const path = require("path")
+const {v4: uuidv4} = require("uuid")
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersSchema")
 
 const storage = multer.diskStorage({
-    destination: "../client/public/uploads",
-    filename:(req, file, cb) => {
-        cb(null, file.fieldname+"_"+Date.now()+path.extname(file.originalname))
+    destination: function(req, file, cb){
+        cb(null, "images")
+        // cb(null, "../client/public/uploads")
+    },
+    filename: function(req, file, cb) {
+        cb(null, uuidv4() + "-"+Date.now()+path.extname(file.originalname))
     }
 })
 
@@ -24,25 +28,34 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({storage, fileFilter})
 
-router.post("/signup", upload.single("profileImage"), async (req, res) => {
+router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{
+        console.log("Akhane");
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
-            const user = new User({
-                fullName: req.body.fullName,
-                email: req.body.email,
-                password: hashedPassword,
-                isVerified: req.body.isVerified,
-                profileImage: req.file.filename
-            })
+            const fullName = req.body.fullName;
+            const email = req.body.email;
+            const password = hashedPassword;
+            const isVerified = req.body.isVerified;
+            const profileImage = req.file.filename
+            
+            const newUserData = {
+                fullName,
+                email,
+                password,
+                isVerified,
+                profileImage
+            }
+
+            const newUser = new User(newUserData)
         
-            await user.save();
-    
-            res.status(200).send({
-                message: "Signup Successful"
-            })
+            newUser.save()
+            .then(() => res.json("User Added"))
+            .catch(err => res.status(400).json("Error: " + err))
        
     }
     catch (err){  
+        console.log("okhane");
+
         res.status(500).send({
             error: err.message
         })
