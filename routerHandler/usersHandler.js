@@ -6,6 +6,9 @@ const path = require("path")
 const {v4: uuidv4} = require("uuid")
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersSchema")
+const url = require("url")
+
+
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
@@ -36,7 +39,7 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
             const email = req.body.email;
             const password = hashedPassword;
             const isVerified = req.body.isVerified;
-            const profileImage = req.file.filename
+            const profileImage = req.file.path
             
             const newUserData = {
                 fullName,
@@ -95,6 +98,12 @@ router.post("/login", async (req, res) => {
             error: err.message
         })
     }
+})
+
+router.get("/profile/:id", async (req, res) => {
+    const query = url.parse(req.url, true).query;
+    const user = await User.find({_id: req.params.id})
+    res.status(200).json(user)
 })
 
 module.exports = router;
