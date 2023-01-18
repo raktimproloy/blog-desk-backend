@@ -20,8 +20,17 @@ const usersSchema = mongoose.Schema({
         default: false
     },
     profileImage: {
-        type: String
-    }
+        type: String,
+        default: "images/users/default-profile-image.png"
+    },
+    blogs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "blogs"
+        }
+    ]
+}, {
+    timestamps: true
 }) 
 
 const User = mongoose.model("User", usersSchema)

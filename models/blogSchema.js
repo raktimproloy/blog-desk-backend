@@ -28,6 +28,10 @@ const postBlogSchema = mongoose.Schema({
     thirdDescription: {
         type: String
     },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users"
+    }
 })
 
 const PostBlog = mongoose.model("blog", postBlogSchema)

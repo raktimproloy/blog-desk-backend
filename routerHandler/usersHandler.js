@@ -12,8 +12,7 @@ const url = require("url")
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
-        cb(null, "images")
-        // cb(null, "../client/public/uploads")
+        cb(null, "images/users")
     },
     filename: function(req, file, cb) {
         cb(null, uuidv4() + "-"+Date.now()+path.extname(file.originalname))
@@ -39,7 +38,7 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
             const email = req.body.email;
             const password = hashedPassword;
             const isVerified = req.body.isVerified;
-            const profileImage = req.file.path
+            const profileImage = req.file === undefined ? undefined : req.file.path;
             
             const newUserData = {
                 fullName,
@@ -52,7 +51,7 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
             const newUser = new User(newUserData)
         
             newUser.save()
-            .then(() => res.json("User Added"))
+            .then(() => res.json("Signup Successful"))
             .catch(err => res.status(400).json("Error: " + err))
        
     }
