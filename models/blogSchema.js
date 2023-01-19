@@ -7,6 +7,9 @@ const postBlogSchema = mongoose.Schema({
     title: {
         type: String
     },
+    category: {
+        type: String
+    },
     BlogImageOne: {
         type: String
     },
@@ -31,6 +34,9 @@ const postBlogSchema = mongoose.Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users"
+    },
+    postedTime: {
+        type: String,
     }
 })
 

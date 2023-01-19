@@ -38,6 +38,7 @@ router.post("/post", upload.fields([
         const postBlog = new PostBlog({
             theme: req.body.theme,
             title: req.body.title,
+            category: req.body.category,
             BlogImageOne: req.files.BlogImageOne[0].path,
             BlogImageTwo: req.files.BlogImageTwo[0].path,
             BlogImageThree: req.files.BlogImageThree[0].path,
@@ -45,7 +46,8 @@ router.post("/post", upload.fields([
             firstDescription: req.body.firstDescription,
             secondDescription: req.body.secondDescription,
             thirdDescription: req.body.thirdDescription,
-            author: req.body.userId
+            author: req.body.userId,
+            postedTime: req.body.postedTime
         })
         const blog = await postBlog.save()
         
