@@ -37,7 +37,19 @@ const postBlogSchema = mongoose.Schema({
     },
     postedTime: {
         type: String,
-    }
+    },
+    likes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "users"
+        }
+    ],
+    comments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "comment"
+        }
+    ]
 })
 
 const PostBlog = mongoose.model("blog", postBlogSchema)
