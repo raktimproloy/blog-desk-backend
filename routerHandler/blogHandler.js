@@ -29,6 +29,7 @@ const upload = multer({storage, fileFilter, key: function(req, file, cb) {
     cb(null, file.originalname)
 }})
 
+// Post Blog
 router.post("/post", upload.fields([
     {name: "BlogImageOne", maxCount: 1},
     {name: "BlogImageTwo", maxCount: 1},
@@ -81,6 +82,30 @@ router.post("/post", upload.fields([
     }
 })
 
+// Get Blog By id
+router.get("/:id", async (req, res) => {
+    const blog = await PostBlog.find({_id: req.params.id})
+    res.status(200).json(blog)
+})
+
+// Get All Blogs
+router.get("/blogs/all",  (req, res) => {
+    try{
+        const blogs =  PostBlog.find({}, (err, result) => {
+            if(err){
+                res.status(500).send("internal server error")
+            }else{
+                res.status(200).send(result)
+            }
+        })
+    }
+    catch(err){
+        res.status(500).send("internal server error")
+    }
+    
+})
+
+// Post Like
 router.post("/like/:id", async (req, res) => {
     try{
         console.log("like", req.params);
@@ -126,6 +151,7 @@ router.post("/like/:id", async (req, res) => {
     }
 })
 
+// Post Comment By Blog Id
 router.post("/comment/:id", async (req, res) => {
     try{
         const postComment = new Comment({
@@ -156,6 +182,7 @@ router.post("/comment/:id", async (req, res) => {
     }
 })
 
+// Get Comment By Blog Id
 router.get("/comment/:id", async (req, res) => {
     try{
         const comment = await Comment.find({_id: req.params.id})
@@ -166,9 +193,6 @@ router.get("/comment/:id", async (req, res) => {
     }
 })
 
-router.get("/:id", async (req, res) => {
-    const blog = await PostBlog.find({_id: req.params.id})
-    res.status(200).json(blog)
-})
+
 
 module.exports = router;

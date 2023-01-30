@@ -5,6 +5,9 @@ const usersSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    about: {
+        type: String
+    },
     email: {
         type: String,
         required: true,
@@ -22,6 +25,12 @@ const usersSchema = mongoose.Schema({
     profileImage: {
         type: String,
         default: "images/users/default-profile-image.png"
+    },
+    facebook: {
+        type: String,
+    },
+    twitter: {
+        type: String,
     },
     blogs: [
         {

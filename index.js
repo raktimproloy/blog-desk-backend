@@ -6,6 +6,8 @@ const path = require("path")
 const usersHandler = require("./routerHandler/usersHandler")
 const blogHandler = require("./routerHandler/blogHandler")
 
+
+
 const app = express()
 app.use(express.json())
 app.use(cors())

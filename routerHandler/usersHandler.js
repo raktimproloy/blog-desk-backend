@@ -35,17 +35,23 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
         console.log("Akhane");
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             const fullName = req.body.fullName;
+            const about = req.body.about;
             const email = req.body.email;
             const password = hashedPassword;
             const isVerified = req.body.isVerified;
+            const facebook = req.body.facebook;
+            const twitter = req.body.twitter;
             const profileImage = req.file === undefined ? undefined : req.file.path;
             
             const newUserData = {
                 fullName,
+                about,
                 email,
                 password,
                 isVerified,
-                profileImage
+                profileImage,
+                facebook,
+                twitter,
             }
 
             const newUser = new User(newUserData)
@@ -103,6 +109,51 @@ router.get("/profile/:id", async (req, res) => {
     const query = url.parse(req.url, true).query;
     const user = await User.find({_id: req.params.id})
     res.status(200).json(user)
+})
+
+router.route("/update/:id").put(upload.single("profileImage"), async (req, res) => {
+    try{
+        const query = url.parse(req.url, true).query;
+        
+            const fullName = req.body.fullName;
+            const about = req.body.about;
+            const isVerified = req.body.isVerified;
+            const facebook = req.body.facebook;
+            const twitter = req.body.twitter;
+            const profileImage = req.file === undefined ? undefined : req.file.path;
+
+            const updateUserData = {
+                fullName,
+                about,
+                isVerified,
+                profileImage,
+                facebook,
+                twitter,
+            }
+            console.log("update data", updateUserData);
+
+        const result = User.findByIdAndUpdate({_id: req.params.id},{
+            $set: updateUserData
+        },{
+            new:true
+        }, (err, doc) => {
+            if(err){
+                res.status(500).json({
+                    error:"There was a server side error!"
+                });
+            }else{
+                res.status(200).json({
+                    message:"Update Successful"
+                });
+            }
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            error:"There was a server side error!"
+        });
+        console.log(err);
+    }
 })
 
 module.exports = router;
