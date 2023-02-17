@@ -75,9 +75,38 @@ router.post("/post", upload.fields([
         })
     }
     catch(err){
-        console.log(err);
         res.status(500).send({
             error: "This is server side error"
+        })
+    }
+})
+router.delete("/delete/:id", async (req, res) => {
+    try{
+        const blog = await PostBlog.findById({_id: req.params.id})
+        if(blog.author){
+            await PostBlog.deleteOne({_id: req.params.id})
+            await User.updateOne({
+                _id: blog.author
+            }, {
+                $pull: {
+                    blogs: req.params.id
+                }
+            })
+            .then(res => {
+                console.log("success","deleted");
+            })
+            .catch(err => {
+                console.log("Not success","Not deleted");
+            })
+            res.status(200).json({
+                message: "deleted successful"
+            })
+        }
+    }
+    catch(err){
+        console.log("success","Not deleted");
+        res.status(500).send({
+            error: "There was a server side problem!"
         })
     }
 })
