@@ -52,7 +52,6 @@ const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{
-        console.log("Akhane");
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             const fullName = req.body.fullName;
             const about = req.body.about;
@@ -78,14 +77,16 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
         
             newUser.save()
             .then(() => res.json("Signup Successful"))
-            .catch(err => res.status(400).json("Error: " + err))
+            .catch(error => {
+                if (error.name === "MongoServerError" && error.message.indexOf("duplicate") === 7) {
+                    res.status(500).send("Email already used");
+                }
+            })
        
     }
-    catch (err){  
-        console.log("okhane");
-
+    catch (err){
         res.status(500).send({
-            error: err.message
+            error: 'There was a server side problem!'
         })
     }
 })
@@ -127,7 +128,10 @@ router.post("/login", async (req, res) => {
 
 router.get("/profile/:id", async (req, res) => {
     const query = url.parse(req.url, true).query;
-    const user = await User.find({_id: req.params.id})
+    const user = await User.find({_id: req.params.id}).select({
+        __v: 0,
+        password: 0
+    })
     res.status(200).json(user)
 })
 
@@ -200,40 +204,57 @@ router.post("/verify/submit/:id", async(req, res) => {
 router.route("/update/:id").put(upload.single("profileImage"), async (req, res) => {
     try{
         const query = url.parse(req.url, true).query;
+        const user = await User.find({email: req.body.email})
+        if(user && user.length > 0){
+            const isValidPassword = await bcrypt.compare(req.body.password, user[0].password);
+            if(isValidPassword){
+                if(user[0].isVerified){
+                    const fullName = req.body.fullName;
+                    const about = req.body.about;
+                    const facebook = req.body.facebook;
+                    const twitter = req.body.twitter;
+                    const profileImage = req.file === undefined ? undefined : req.file.path;
         
-            const fullName = req.body.fullName;
-            const about = req.body.about;
-            const isVerified = req.body.isVerified;
-            const facebook = req.body.facebook;
-            const twitter = req.body.twitter;
-            const profileImage = req.file === undefined ? undefined : req.file.path;
-
-            const updateUserData = {
-                fullName,
-                about,
-                isVerified,
-                profileImage,
-                facebook,
-                twitter,
-            }
-            console.log("update data", updateUserData);
-
-        const result = User.findByIdAndUpdate({_id: req.params.id},{
-            $set: updateUserData
-        },{
-            new:true
-        }, (err, doc) => {
-            if(err){
-                res.status(500).json({
-                    error:"There was a server side error!"
-                });
-            }else{
+                    const updateUserData = {
+                        fullName,
+                        about,
+                        profileImage,
+                        facebook,
+                        twitter,
+                    }
+        
+                    const result = User.findByIdAndUpdate({_id: req.params.id},{
+                        $set: updateUserData
+                    },{
+                        new:true
+                    }, (err, doc) => {
+                        if(err){
+                            res.status(500).json({
+                                error:"There was a server side error!"
+                            });
+                        }else{
+                            
+                            res.status(200).json({
+                                message:"Update Successful"
+                            });
+                        }
+                    })
+                }else{
+                    res.status(401).json({
+                        error:"Id not verified!"
+                    });
+                }
                 
-                res.status(200).json({
-                    message:"Update Successful"
+            }else{
+                res.status(401).json({
+                    error:"Authentication Error!"
                 });
             }
-        })
+        }else{
+            res.status(404).json({
+                error:"User not found!"
+            });
+        }
     }
     catch(err){
         res.status(500).json({

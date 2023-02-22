@@ -38,6 +38,9 @@ const postBlogSchema = mongoose.Schema({
     postedTime: {
         type: String,
     },
+    ratingPoint: {
+        type: Number
+    },
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,

@@ -51,6 +51,7 @@ router.post("/post", upload.fields([
             secondDescription: req.body.secondDescription,
             thirdDescription: req.body.thirdDescription,
             author: req.body.userId,
+            ratingPoint: 0,
             postedTime: req.body.postedTime
         })
         const blog = await postBlog.save()
@@ -146,6 +147,9 @@ router.post("/like/:id", async (req, res) => {
             }, {
                 $push: {
                     likes: id
+                },
+                $set: {
+                    ratingPoint: 3
                 }
             })
                 .then(res => {
