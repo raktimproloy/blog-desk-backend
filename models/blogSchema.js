@@ -41,6 +41,9 @@ const postBlogSchema = mongoose.Schema({
     ratingPoint: {
         type: Number
     },
+    views: {
+        type: Number
+    },
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,

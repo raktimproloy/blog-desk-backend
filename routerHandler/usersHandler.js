@@ -192,14 +192,6 @@ router.put("/verify/:id", async(req, res) => {
 
     }
 })
-router.post("/verify/submit/:id", async(req, res) => {
-    try{
-        console.log(userObj);
-    }
-    catch{
-        console.log(otp);
-    }
-})
 
 router.route("/update/:id").put(upload.single("profileImage"), async (req, res) => {
     try{

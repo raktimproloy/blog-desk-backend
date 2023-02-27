@@ -5,6 +5,7 @@ const User = require("../models/usersSchema")
 const Comment = require("../models/commentSchema")
 const path = require("path")
 const {v4: uuidv4} = require("uuid")
+const { findByIdAndUpdate } = require("../models/blogSchema")
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -37,8 +38,7 @@ router.post("/post", upload.fields([
     {name: "BlogImageFour", maxCount: 1},
 ]), async (req, res) => {
     try{
-        console.log(req.body.theme);
-        console.log(req.files.BlogImageOne); 
+        console.log("Dakho",req.body.firstDescription);
         const postBlog = new PostBlog({
             theme: req.body.theme,
             title: req.body.title,
@@ -52,6 +52,7 @@ router.post("/post", upload.fields([
             thirdDescription: req.body.thirdDescription,
             author: req.body.userId,
             ratingPoint: 0,
+            views: 0,
             postedTime: req.body.postedTime
         })
         const blog = await postBlog.save()
@@ -222,6 +223,51 @@ router.get("/comment/:id", async (req, res) => {
         res.status(200).json(comment)
     }
     catch(err){
+        console.log(err);
+    }
+})
+
+// make view Count on blog
+router.put("/views/:id", async (req, res) => {
+    try{
+        const views = req.body.views
+        const updateviews = {
+            views
+        }
+        const result = PostBlog.findByIdAndUpdate({_id: req.params.id}, {
+            $set: updateviews
+        }, {
+            new: true
+        }, (err, doc) => {
+            if(err){
+                console.log("No Views");
+            }else{
+                console.log("views");
+            }
+        })
+    }
+    catch(err){
+
+    }
+})
+
+router.put("/update/:id", async (req, res) => {
+    try{
+        const updatedBlogData = req.body
+        const result = PostBlog.findByIdAndUpdate({_id: req.params.id}, {
+            $set: updatedBlogData
+        }, {
+            new: true
+        }, (err, doc) => {
+            if(err){
+                console.log("Not Updated");
+            }else{
+                console.log("Updated");
+            }
+        })
+    }
+    catch(err){
+
         console.log(err);
     }
 })
