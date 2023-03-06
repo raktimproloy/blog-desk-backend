@@ -31,8 +31,6 @@ const errorHandler = (err, req, res, next) => {
 }
 app.use(errorHandler)
 
-
-
 app.listen(3001, () => {
     console.log("Listening 3001");
 })
