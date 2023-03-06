@@ -76,7 +76,10 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
             const newUser = new User(newUserData)
         
             newUser.save()
-            .then(() => res.json("Signup Successful"))
+            .then((resss) => {
+                res.json("Signup Successful")
+                console.log(resss);
+            })
             .catch(error => {
                 if (error.name === "MongoServerError" && error.message.indexOf("duplicate") === 7) {
                     res.status(500).send("Email already used");
