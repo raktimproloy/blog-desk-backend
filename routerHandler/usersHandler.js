@@ -62,49 +62,51 @@ const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{    
-        const email = req.body.email;
-        if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
-            const user = await User.find({email: email})
-            if(user && user.length > 0){
-                res.status(409).json({error: "Email already used"})
-            }else{
-                const hashedPassword = await bcrypt.hash(req.body.password, 10)
-                const fullName = req.body.fullName;
-                const about = "";
+        if(req.body.secrectCode === "1234"){
+            const email = req.body.email;
+            if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+                const user = await User.find({email: email})
+                if(user && user.length > 0){
+                    res.status(409).json({error: "Email already used"})
+                }else{
+                    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+                    const fullName = req.body.fullName;
+                    const about = "";
+                    
+                    const password = hashedPassword;
+                    const isVerified = false;
+                    const facebook = "";
+                    const twitter = "";
+                    const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                    const newUserData = {
+                        fullName,
+                        about,
+                        email,
+                        password,
+                        isVerified,
+                        profileImage: result === undefined ? undefined : result.secure_url,
+                        cloudinary_id: result === undefined ? undefined : result.public_id,
+                        facebook,
+                        twitter,
+                    }
+        
+                    const newUser = new User(newUserData)
                 
-                const password = hashedPassword;
-                const isVerified = false;
-                const facebook = "";
-                const twitter = "";
-                const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
-                const newUserData = {
-                    fullName,
-                    about,
-                    email,
-                    password,
-                    isVerified,
-                    profileImage: result === undefined ? undefined : result.secure_url,
-                    cloudinary_id: result === undefined ? undefined : result.public_id,
-                    facebook,
-                    twitter,
+                    newUser.save()
+                    .then((result) => {
+                        res.status(200).json({message: "Signup Successful"})
+                    }).catch((err) => {
+                        console.log(err);
+                    });
                 }
-    
-                const newUser = new User(newUserData)
-            
-                newUser.save()
-                .then((result) => {
-                    res.status(200).json({message: "Signup Successful"})
-                }).catch((err) => {
-                    console.log(err);
-                });
+            }else{
+                res.status(400).json({error: "Invalid email!"})
             }
-        }else{
-            res.status(400).json({error: "Invalid email!"})
         }
     }
     catch (err){
         res.status(500).json({
-            error: 'There was a server side problem!'
+            error: 'Atai kamal Joshim vai'
         })
     }
 })
