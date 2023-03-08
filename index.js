@@ -33,6 +33,6 @@ app.use(errorHandler)
 
 let PORT = process.env.PORT || 3001
 
-app.listen(PORT, () => {
+app.listen(3001, () => {
     console.log(`Listening ${PORT}`);
 })
