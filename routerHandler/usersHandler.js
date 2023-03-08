@@ -70,13 +70,12 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
             }else{
                 const hashedPassword = await bcrypt.hash(req.body.password, 10)
                 const fullName = req.body.fullName;
-                const about = req.body.about;
+                const about = "";
                 
                 const password = hashedPassword;
-                const isVerified = req.body.isVerified;
-                const facebook = req.body.facebook;
-                const twitter = req.body.twitter;
-                const profileImage = req.file === undefined ? undefined : req.file.path;
+                const isVerified = false;
+                const facebook = "";
+                const twitter = "";
                 const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
                 const newUserData = {
                     fullName,
