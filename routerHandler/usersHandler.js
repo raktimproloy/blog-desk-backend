@@ -3,15 +3,25 @@ const router = express.Router()
 const bcrypt = require("bcrypt")
 const multer = require("multer")
 const path = require("path")
+const dotenv = require("dotenv")
 const {v4: uuidv4} = require("uuid")
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersSchema")
 const url = require("url")
 const nodemailer = require("nodemailer")
+const cloudinary = require("cloudinary").v2
 
 
+dotenv.config()
 
 var sessionData;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDNAME,
+    api_key: process.env.CLOUDAPIKEY,
+    api_secret: process.env.CLOUDINARYSECRET,
+    secure: true
+  })
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -51,44 +61,50 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
-    try{
-            const hashedPassword = await bcrypt.hash(req.body.password, 10)
-            const fullName = req.body.fullName;
-            const about = req.body.about;
-            const email = req.body.email;
-            const password = hashedPassword;
-            const isVerified = req.body.isVerified;
-            const facebook = req.body.facebook;
-            const twitter = req.body.twitter;
-            const profileImage = req.file === undefined ? undefined : req.file.path;
-            
-            const newUserData = {
-                fullName,
-                about,
-                email,
-                password,
-                isVerified,
-                profileImage,
-                facebook,
-                twitter,
-            }
-
-            const newUser = new User(newUserData)
-        
-            newUser.save()
-            .then((resss) => {
-                res.json("Signup Successful")
-                console.log(resss);
-            })
-            .catch(error => {
-                if (error.name === "MongoServerError" && error.message.indexOf("duplicate") === 7) {
-                    res.status(500).send("Email already used");
+    try{    
+        const email = req.body.email;
+        if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+            const user = await User.find({email: email})
+            if(user && user.length > 0){
+                res.status(409).json({error: "Email already used"})
+            }else{
+                const hashedPassword = await bcrypt.hash(req.body.password, 10)
+                const fullName = req.body.fullName;
+                const about = req.body.about;
+                
+                const password = hashedPassword;
+                const isVerified = req.body.isVerified;
+                const facebook = req.body.facebook;
+                const twitter = req.body.twitter;
+                const profileImage = req.file === undefined ? undefined : req.file.path;
+                const result = await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                const newUserData = {
+                    fullName,
+                    about,
+                    email,
+                    password,
+                    isVerified,
+                    profileImage: result.secure_url,
+                    cloudinary_id: result.public_id,
+                    facebook,
+                    twitter,
                 }
-            })
-       
+    
+                const newUser = new User(newUserData)
+            
+                newUser.save()
+                .then((result) => {
+                    res.status(200).json({message: "Signup Successful"})
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
+        }else{
+            res.status(400).json({error: "Invalid email!"})
+        }
     }
     catch (err){
-        res.status(500).send({
+        res.status(500).json({
             error: 'There was a server side problem!'
         })
     }
@@ -204,16 +220,19 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
             const isValidPassword = await bcrypt.compare(req.body.password, user[0].password);
             if(isValidPassword){
                 if(user[0].isVerified){
+                    await cloudinary.uploader.destroy(user[0].cloudinary_id);
                     const fullName = req.body.fullName;
                     const about = req.body.about;
                     const facebook = req.body.facebook;
                     const twitter = req.body.twitter;
-                    const profileImage = req.file === undefined ? undefined : req.file.path;
+                    // const profileImage = req.file === undefined ? undefined : req.file.path;
+                    const ImageCloudinary = await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
         
                     const updateUserData = {
                         fullName,
                         about,
-                        profileImage,
+                        profileImage: ImageCloudinary.secure_url,
+                        cloudinary_id: ImageCloudinary.public_id,
                         facebook,
                         twitter,
                     }
@@ -255,7 +274,6 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
         res.status(500).json({
             error:"There was a server side error!"
         });
-        console.log(err);
     }
 })
 

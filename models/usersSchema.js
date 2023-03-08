@@ -11,8 +11,7 @@ const usersSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-        match: /.+\@.+\..+/,
-        unique: true
+        match: /.+\@.+\..+/
     },
     password: {
         type: String,
@@ -25,6 +24,9 @@ const usersSchema = mongoose.Schema({
     profileImage: {
         type: String,
         default: "images/users/default-profile-image.png"
+    },
+    cloudinary_id: {
+        type: String
     },
     facebook: {
         type: String,

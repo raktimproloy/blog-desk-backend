@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
   "author": "Raktim Proloy",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "cloudinary": "^1.35.0",
     "connect-memcached": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

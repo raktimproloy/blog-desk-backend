@@ -6,7 +6,7 @@ const path = require("path")
 const usersHandler = require("./routerHandler/usersHandler")
 const blogHandler = require("./routerHandler/blogHandler")
 const BASE_URL = process.env.BASE_URL
-const url = "mongodb+srv://Raktim:htrBA5BRiZQDrX3J@cluster0.jmxy9mw.mongodb.net/?retryWrites=true&w=majority"
+const url = "mongodb+srv://raktimproloy01:6BxiA7Bvn24k4QiM@cluster0.xnrzeb4.mongodb.net/?retryWrites=true&w=majority"
 const localUrl = "mongodb://127.0.0.1:27017"
 
 const app = express()
@@ -14,10 +14,13 @@ app.use(express.json())
 app.use(cors())
 app.use(express.static(path.join(__dirname, "/")))
 dotenv.config()
+app.use(express.urlencoded({
+    extended: true
+}))
 
 mongoose.set('strictQuery', true);
-mongoose.connect(`${url}/blog-desk`)
-    .then(() => console.log("Database Connected"))
+mongoose.connect(process.env.BASE_URL)
+    .then(() => console.log("Database Connected successful"))
     .catch(err => console.log(err.message))
 
 app.use("/users", usersHandler)
