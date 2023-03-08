@@ -10,6 +10,7 @@ const User = require("../models/usersSchema")
 const url = require("url")
 const nodemailer = require("nodemailer")
 const cloudinary = require("cloudinary").v2
+const CryptoJS = require("crypto-js")
 
 
 dotenv.config()
@@ -62,51 +63,54 @@ const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{    
-        if(req.body.secrectCode === "1234"){
-            const email = req.body.email;
-            if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
-                const user = await User.find({email: email})
-                if(user && user.length > 0){
-                    res.status(409).json({error: "Email already used"})
-                }else{
-                    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-                    const fullName = req.body.fullName;
-                    const about = "";
-                    
-                    const password = hashedPassword;
-                    const isVerified = false;
-                    const facebook = "";
-                    const twitter = "";
-                    const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
-                    const newUserData = {
-                        fullName,
-                        about,
-                        email,
-                        password,
-                        isVerified,
-                        profileImage: result === undefined ? undefined : result.secure_url,
-                        cloudinary_id: result === undefined ? undefined : result.public_id,
-                        facebook,
-                        twitter,
-                    }
         
-                    const newUser = new User(newUserData)
-                
-                    newUser.save()
-                    .then((result) => {
-                        res.status(200).json({message: "Signup Successful"})
-                    }).catch((err) => {
-                        console.log(err);
-                    });
-                }
+        // Test
+        var bytes = CryptoJS.AES.decrypt(req.body.userSignupData, 'my-secret-key@123');
+        var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        // Test
+        const email = decryptedData.email;
+        if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+            const user = await User.find({email: email})
+            if(user && user.length > 0){
+                res.status(409).json({error: "Email already used"})
             }else{
-                res.status(400).json({error: "Invalid email!"})
+                const hashedPassword = await bcrypt.hash(decryptedData.password, 10)
+                const fullName = decryptedData.fullName;
+                const about = "";
+                
+                const password = hashedPassword;
+                const isVerified = false;
+                const facebook = "";
+                const twitter = "";
+                const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                const newUserData = {
+                    fullName,
+                    about,
+                    email,
+                    password,
+                    isVerified,
+                    profileImage: result === undefined ? undefined : result.secure_url,
+                    cloudinary_id: result === undefined ? undefined : result.public_id,
+                    facebook,
+                    twitter,
+                }
+    
+                const newUser = new User(newUserData)
+            
+                newUser.save()
+                .then((result) => {
+                    res.status(200).json({message: "Signup Successful"})
+                }).catch((err) => {
+                    console.log(err);
+                });
             }
+        }else{
+            res.status(400).json({error: "Invalid email!"})
         }
     }
     catch (err){
         res.status(500).json({
-            error: 'Atai kamal Joshim vai'
+            error: 'There was a server side problem!'
         })
     }
 })
