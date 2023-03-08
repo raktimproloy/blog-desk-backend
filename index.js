@@ -31,8 +31,8 @@ const errorHandler = (err, req, res, next) => {
 }
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 3001
+let PORT = process.env.PORT || 3001
 
 app.listen(PORT, () => {
-    console.log("Listening 3001");
+    console.log(`Listening ${PORT}`);
 })
