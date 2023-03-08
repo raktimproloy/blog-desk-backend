@@ -77,15 +77,15 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
                 const facebook = req.body.facebook;
                 const twitter = req.body.twitter;
                 const profileImage = req.file === undefined ? undefined : req.file.path;
-                const result = await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
                 const newUserData = {
                     fullName,
                     about,
                     email,
                     password,
                     isVerified,
-                    profileImage: result.secure_url,
-                    cloudinary_id: result.public_id,
+                    profileImage: result === undefined ? undefined : result.secure_url,
+                    cloudinary_id: result === undefined ? undefined : result.public_id,
                     facebook,
                     twitter,
                 }
