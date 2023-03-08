@@ -63,19 +63,18 @@ const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{    
-        
         // Test
-        var bytes = CryptoJS.AES.decrypt(req.body.userSignupData, 'my-secret-key@123');
-        var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        // var bytes = CryptoJS.AES.decrypt(req.body.userSignupData, 'my-secret-key@123');
+        // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
         // Test
-        const email = decryptedData.email;
+        const email = req.body.email;
         if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
             const user = await User.find({email: email})
             if(user && user.length > 0){
                 res.status(409).json({error: "Email already used"})
             }else{
-                const hashedPassword = await bcrypt.hash(decryptedData.password, 10)
-                const fullName = decryptedData.fullName;
+                const hashedPassword = await bcrypt.hash(req.body.password, 10)
+                const fullName = req.body.fullName;
                 const about = "";
                 
                 const password = hashedPassword;
@@ -171,7 +170,7 @@ router.put("/verify/:id", async(req, res) => {
                 subject: 'Blog Desk id verification code',
                 text:  `Your OTP code is ${otp}`
               };
-              
+              console.log("send",otp);
               transporter.sendMail(mailOptions, function(error, info){
                 if (error) {
                     res.status(500).json({
@@ -185,6 +184,7 @@ router.put("/verify/:id", async(req, res) => {
               });
         }else{
             if(req.body.getOtp === otp){
+                console.log("send",otp);
                 const isVerified = true;
                 const updateUserData = {
                     isVerified,
