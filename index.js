@@ -5,9 +5,6 @@ const cors = require("cors")
 const path = require("path")
 const usersHandler = require("./routerHandler/usersHandler")
 const blogHandler = require("./routerHandler/blogHandler")
-const BASE_URL = process.env.BASE_URL
-const url = "mongodb+srv://raktimproloy01:6BxiA7Bvn24k4QiM@cluster0.xnrzeb4.mongodb.net/?retryWrites=true&w=majority"
-const localUrl = "mongodb://127.0.0.1:27017"
 
 const app = express()
 app.use(express.json())
@@ -34,6 +31,8 @@ const errorHandler = (err, req, res, next) => {
 }
 app.use(errorHandler)
 
-app.listen(3001, () => {
+const PORT = process.env.PORT || 3001
+
+app.listen(PORT, () => {
     console.log("Listening 3001");
 })
