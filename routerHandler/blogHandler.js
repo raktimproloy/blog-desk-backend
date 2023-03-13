@@ -5,16 +5,21 @@ const User = require("../models/usersSchema")
 const Comment = require("../models/commentSchema")
 const path = require("path")
 const {v4: uuidv4} = require("uuid")
-const { findByIdAndUpdate } = require("../models/blogSchema")
 const router = express.Router();
+const {CloudinaryStorage} = require("multer-storage-cloudinary")
+const dotenv = require("dotenv")
+const cloudinary = require("cloudinary").v2
 
-const storage = multer.diskStorage({
-    destination: function(req, file, cb){
-        cb(null, "images/blogs")
-    },
-    filename:(req, file, cb) => {
-        cb(null, uuidv4() +"-"+Date.now()+path.extname(file.originalname))
-    }
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDNAME,
+    api_key: process.env.CLOUDAPIKEY,
+    api_secret: process.env.CLOUDINARYSECRET,
+    secure: true
+  })
+
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
 })
 
 const fileFilter = (req, file, cb) => {
@@ -30,6 +35,7 @@ const upload = multer({storage, fileFilter, key: function(req, file, cb) {
     cb(null, file.originalname)
 }})
 
+
 // Post Blog
 router.post("/post", upload.fields([
     {name: "BlogImageOne", maxCount: 1},
@@ -38,15 +44,20 @@ router.post("/post", upload.fields([
     {name: "BlogImageFour", maxCount: 1},
 ]), async (req, res) => {
     try{
-        console.log("Dakho",req.body.firstDescription);
+
+        const BlogImageOneCloudinary = await cloudinary.uploader.upload(req.files.BlogImageOne[0].path, {"folder": "blog-desk/blogs"});
+        const BlogImageTwoCloudinary = req.files.BlogImageTwo === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"});
+        const BlogImageThreeCloudinary = req.files.BlogImageThree === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageThree[0].path, {"folder": "blog-desk/blogs"});
+        const BlogImageFourCloudinary = req.files.BlogImageFour === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageFour[0].path, {"folder": "blog-desk/blogs"});
+
         const postBlog = new PostBlog({
             theme: req.body.theme,
             title: req.body.title,
             category: req.body.category,
-            BlogImageOne: req.files.BlogImageOne[0].path,
-            BlogImageTwo: req.files.BlogImageTwo === undefined ? undefined : req.files.BlogImageTwo[0].path,
-            BlogImageThree: req.files.BlogImageThree === undefined ? undefined : req.files.BlogImageThree[0].path,
-            BlogImageFour: req.files.BlogImageFour === undefined ? undefined : req.files.BlogImageFour[0].path,
+            BlogImageOne:  BlogImageOneCloudinary.secure_url,
+            BlogImageTwo: BlogImageTwoCloudinary === undefined ? undefined : BlogImageTwoCloudinary.secure_url,
+            BlogImageThree: BlogImageThreeCloudinary === undefined ? undefined : BlogImageThreeCloudinary.secure_url,
+            BlogImageFour: BlogImageFourCloudinary === undefined ? undefined : BlogImageFourCloudinary.secure_url,
             firstDescription: req.body.firstDescription,
             secondDescription: req.body.secondDescription,
             thirdDescription: req.body.thirdDescription,
@@ -73,15 +84,20 @@ router.post("/post", upload.fields([
 
 
         res.status(200).send({
-            message: "Post Successful"
+            message: "Post Successful",
+            blogId: blog._id
         })
     }
     catch(err){
+        console.log(err);
         res.status(500).send({
             error: "This is server side error"
         })
     }
 })
+
+
+
 router.delete("/delete/:id", async (req, res) => {
     try{
         const blog = await PostBlog.findById({_id: req.params.id})
@@ -110,6 +126,19 @@ router.delete("/delete/:id", async (req, res) => {
         res.status(500).send({
             error: "There was a server side problem!"
         })
+    }
+})
+
+router.get("/author/:id", async (req, res) => {
+    try{
+        const user = await User.find({_id: req.params.id}).select({
+            __v: 0,
+            password: 0
+        })
+        res.status(200).json(user)
+    }
+    catch(err){
+        res.status(500).json(err)
     }
 })
 
@@ -271,6 +300,9 @@ router.put("/update/:id", async (req, res) => {
         console.log(err);
     }
 })
+
+
+
 
 
 

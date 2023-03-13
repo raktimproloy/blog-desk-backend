@@ -25,9 +25,6 @@ const usersSchema = mongoose.Schema({
         type: String,
         default: "https://res.cloudinary.com/dcbantk1f/image/upload/v1678271673/blog-desk/users/default-profile-image_ttnclz.png"
     },
-    cloudinary_id: {
-        type: String
-    },
     facebook: {
         type: String,
     },

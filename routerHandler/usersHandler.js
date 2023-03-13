@@ -10,12 +10,12 @@ const User = require("../models/usersSchema")
 const url = require("url")
 const nodemailer = require("nodemailer")
 const cloudinary = require("cloudinary").v2
-const CryptoJS = require("crypto-js")
+// const CryptoJS = require("crypto-js")
+const checkToken = require("../middleware/checkToken")
+const {CloudinaryStorage} = require("multer-storage-cloudinary")
 
 
 dotenv.config()
-
-var sessionData;
 
 cloudinary.config({
     cloud_name: process.env.CLOUDNAME,
@@ -41,13 +41,8 @@ const createOtp = () => {
     return otp;
 }
 
-const storage = multer.diskStorage({
-    destination: function(req, file, cb){
-        cb(null, "images/users")
-    },
-    filename: function(req, file, cb) {
-        cb(null, uuidv4() + "-"+Date.now()+path.extname(file.originalname))
-    }
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
 })
 
 const fileFilter = (req, file, cb) => {
@@ -63,6 +58,7 @@ const upload = multer({storage, fileFilter})
 
 router.route("/signup").post(upload.single("profileImage"), async (req, res) => {
     try{    
+        console.log(req.file);
         // Test
         // var bytes = CryptoJS.AES.decrypt(req.body.userSignupData, 'my-secret-key@123');
         // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
@@ -89,7 +85,6 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
                     password,
                     isVerified,
                     profileImage: result === undefined ? undefined : result.secure_url,
-                    cloudinary_id: result === undefined ? undefined : result.public_id,
                     facebook,
                     twitter,
                 }
@@ -149,13 +144,17 @@ router.post("/login", async (req, res) => {
     }
 })
 
-router.get("/profile/:id", async (req, res) => {
-    const query = url.parse(req.url, true).query;
-    const user = await User.find({_id: req.params.id}).select({
-        __v: 0,
-        password: 0
-    })
-    res.status(200).json(user)
+router.get("/profile", checkToken, async (req, res) => {
+    try{
+        const user = await User.find({_id: req.userId}).select({
+            __v: 0,
+            password: 0
+        })
+        res.status(200).json(user)
+    }
+    catch(err){
+        res.status(500).json(err)
+    }
 })
 
 let otp;
