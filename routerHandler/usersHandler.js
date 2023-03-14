@@ -77,7 +77,10 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
                 const isVerified = false;
                 const facebook = "";
                 const twitter = "";
+                const linkedin = "";
+                const instagram = "";
                 const result = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                console.log("Result", result);
                 const newUserData = {
                     fullName,
                     about,
@@ -85,8 +88,11 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
                     password,
                     isVerified,
                     profileImage: result === undefined ? undefined : result.secure_url,
+                    cloudinary_id: result === undefined ? undefined : result.public_id,
                     facebook,
                     twitter,
+                    linkedin,
+                    instagram,
                 }
     
                 const newUser = new User(newUserData)
@@ -230,13 +236,13 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
                     const facebook = req.body.facebook;
                     const twitter = req.body.twitter;
                     // const profileImage = req.file === undefined ? undefined : req.file.path;
-                    const ImageCloudinary = await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+                    const ImageCloudinary = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
         
                     const updateUserData = {
                         fullName,
                         about,
-                        profileImage: ImageCloudinary.secure_url,
-                        cloudinary_id: ImageCloudinary.public_id,
+                        profileImage: ImageCloudinary === undefined ? undefined : ImageCloudinary.secure_url,
+                        cloudinary_id: ImageCloudinary === undefined ? undefined : ImageCloudinary.public_id,
                         facebook,
                         twitter,
                     }
@@ -248,7 +254,7 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
                     }, (err, doc) => {
                         if(err){
                             res.status(500).json({
-                                error:"There was a server side error!"
+                                error:"There was a server side error!ss"
                             });
                         }else{
                             
@@ -275,6 +281,7 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
         }
     }
     catch(err){
+        console.log(err);
         res.status(500).json({
             error:"There was a server side error!"
         });
