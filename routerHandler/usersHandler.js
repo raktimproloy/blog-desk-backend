@@ -226,43 +226,52 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
     try{
         const query = url.parse(req.url, true).query;
         const user = await User.find({email: req.body.email})
+        const regFacebookLink = /^(https?:\/\/)?(www\.)?facebook\.com\/[a-zA-Z0-9\.]{1,}\/?(?:\?.*)?$/
+        const regTwitterLink = /^(https?:\/\/)?(www\.)?twitter\.com\/[a-zA-Z0-9_]{1,15}\/?(?:\?.*)?$/
+
         if(user && user.length > 0){
             const isValidPassword = await bcrypt.compare(req.body.password, user[0].password);
             if(isValidPassword){
                 if(user[0].isVerified){
-                    await cloudinary.uploader.destroy(user[0].cloudinary_id);
-                    const fullName = req.body.fullName;
-                    const about = req.body.about;
-                    const facebook = req.body.facebook;
-                    const twitter = req.body.twitter;
-                    // const profileImage = req.file === undefined ? undefined : req.file.path;
-                    const ImageCloudinary = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
-        
-                    const updateUserData = {
-                        fullName,
-                        about,
-                        profileImage: ImageCloudinary === undefined ? undefined : ImageCloudinary.secure_url,
-                        cloudinary_id: ImageCloudinary === undefined ? undefined : ImageCloudinary.public_id,
-                        facebook,
-                        twitter,
-                    }
-        
-                    const result = User.findByIdAndUpdate({_id: req.params.id},{
-                        $set: updateUserData
-                    },{
-                        new:true
-                    }, (err, doc) => {
-                        if(err){
-                            res.status(500).json({
-                                error:"There was a server side error!ss"
-                            });
-                        }else{
-                            
-                            res.status(200).json({
-                                message:"Update Successful"
-                            });
+                    if(req.body.facebook === "" || regFacebookLink.test(req.body.facebook) && req.body.twitter === "" || regTwitterLink.test(req.body.facebook)){
+                        await cloudinary.uploader.destroy(user[0].cloudinary_id);
+                        const fullName = req.body.fullName;
+                        const about = req.body.about;
+                        const facebook = req.body.facebook;
+                        const twitter = req.body.twitter;
+                        // const profileImage = req.file === undefined ? undefined : req.file.path;
+                        const ImageCloudinary = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
+            
+                        const updateUserData = {
+                            fullName,
+                            about,
+                            profileImage: ImageCloudinary === undefined ? undefined : ImageCloudinary.secure_url,
+                            cloudinary_id: ImageCloudinary === undefined ? undefined : ImageCloudinary.public_id,
+                            facebook,
+                            twitter,
                         }
-                    })
+            
+                        const result = User.findByIdAndUpdate({_id: req.params.id},{
+                            $set: updateUserData
+                        },{
+                            new:true
+                        }, (err, doc) => {
+                            if(err){
+                                res.status(500).json({
+                                    error:"There was a server side error!ss"
+                                });
+                            }else{
+                                
+                                res.status(200).json({
+                                    message:"Update Successful"
+                                });
+                            }
+                        })
+                    }else{
+                        res.status(401).json({
+                            error:"Wrong Link"
+                        });
+                    }
                 }else{
                     res.status(401).json({
                         error:"Id not verified!"
