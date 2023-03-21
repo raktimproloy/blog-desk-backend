@@ -2,34 +2,54 @@ const mongoose = require("mongoose")
 
 const postBlogSchema = mongoose.Schema({
     theme: {
-        type: String
+        type: String,
+        required: true
     },
     title: {
-        type: String
+        type: String,
+        required: true
     },
     category: {
-        type: String
+        type: String,
+        required: true
     },
     BlogImageOne: {
-        type: String
+        type: String,
+        required: true
     },
     firstDescription: {
-        type: String
+        type: String,
+        required: true
     },
     BlogImageTwo: {
-        type: String
+        type: String,
+        required: function() {
+            return this.theme >= 2
+        }
     },
     secondDescription: {
-        type: String
+        type: String,
+        required: function() {
+            return this.theme >= 2
+        }
     },
     BlogImageThree: {
-        type: String
+        type: String,
+        required: function() {
+            return this.theme >= 3
+        }
     },
     BlogImageFour: {
-        type: String
+        type: String,
+        required: function() {
+            return this.theme >= 4
+        }
     },
     thirdDescription: {
-        type: String
+        type: String,
+        required: function() {
+            return this.theme >= 3
+        }
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,

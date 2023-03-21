@@ -45,9 +45,10 @@ router.post("/post", upload.fields([
 ]), async (req, res) => {
     try{
         const BlogImageOneCloudinary = await cloudinary.uploader.upload(req.files.BlogImageOne[0].path, {"folder": "blog-desk/blogs"});
-        const BlogImageTwoCloudinary = req.files.BlogImageTwo === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"});
-        const BlogImageThreeCloudinary = req.files.BlogImageThree === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageThree[0].path, {"folder": "blog-desk/blogs"});
-        const BlogImageFourCloudinary = req.files.BlogImageFour === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageFour[0].path, {"folder": "blog-desk/blogs"});
+        // const BlogImageTwoCloudinary = req.files.BlogImageTwo === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"});
+        const BlogImageTwoCloudinary = req.body.theme >= 2 ? await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"}) : undefined;
+        const BlogImageThreeCloudinary = req.body.theme >= 3 ? await cloudinary.uploader.upload(req.files.BlogImageThree[0].path, {"folder": "blog-desk/blogs"}) : undefined;
+        const BlogImageFourCloudinary = req.body.theme == 4 ? await cloudinary.uploader.upload(req.files.BlogImageFour[0].path, {"folder": "blog-desk/blogs"}) : undefined;
 
         const postBlog = new PostBlog({
             theme: req.body.theme,
