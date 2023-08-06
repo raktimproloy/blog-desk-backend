@@ -28,7 +28,7 @@ var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: 'raktimproloy@gmail.com',
-      pass: 'ohyhbbihkqmslcfp'
+      pass: 'dowayjyiorhrggzl'
     }
   });
 
@@ -178,6 +178,7 @@ router.put("/verify/:id", async(req, res) => {
               console.log("send",otp);
               transporter.sendMail(mailOptions, function(error, info){
                 if (error) {
+                    console.log(error)
                     res.status(500).json({
                         error: "Email not sent"
                     })
