@@ -45,7 +45,6 @@ router.post("/post", upload.fields([
 ]), async (req, res) => {
     try{
         const BlogImageOneCloudinary = await cloudinary.uploader.upload(req.files.BlogImageOne[0].path, {"folder": "blog-desk/blogs"});
-        // const BlogImageTwoCloudinary = req.files.BlogImageTwo === undefined ? undefined : await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"});
         const BlogImageTwoCloudinary = req.body.theme >= 2 ? await cloudinary.uploader.upload(req.files.BlogImageTwo[0].path, {"folder": "blog-desk/blogs"}) : undefined;
         const BlogImageThreeCloudinary = req.body.theme >= 3 ? await cloudinary.uploader.upload(req.files.BlogImageThree[0].path, {"folder": "blog-desk/blogs"}) : undefined;
         const BlogImageFourCloudinary = req.body.theme == 4 ? await cloudinary.uploader.upload(req.files.BlogImageFour[0].path, {"folder": "blog-desk/blogs"}) : undefined;
@@ -76,10 +75,14 @@ router.post("/post", upload.fields([
             }
         })
         .then(res => {
-            console.log("success",res);
+            res.status(200).send({
+                error: "Successful"
+            })
         })
         .catch(err => {
-            console.log("error",err);
+            res.status(500).send({
+                error: "This is server side error"
+            })
         })
 
 
@@ -89,7 +92,6 @@ router.post("/post", upload.fields([
         })
     }
     catch(err){
-        console.log(err);
         res.status(500).send({
             error: "This is server side error"
         })
@@ -111,10 +113,14 @@ router.delete("/delete/:id", async (req, res) => {
                 }
             })
             .then(res => {
-                console.log("success","deleted");
+                res.status(200).send({
+                    error: "Deleted"
+                })
             })
             .catch(err => {
-                console.log("Not success","Not deleted");
+                res.status(500).send({
+                    error: "Can't Delete"
+                })
             })
             res.status(200).json({
                 message: "deleted successful"
@@ -122,7 +128,6 @@ router.delete("/delete/:id", async (req, res) => {
         }
     }
     catch(err){
-        console.log("success","Not deleted");
         res.status(500).send({
             error: "There was a server side problem!"
         })
@@ -168,8 +173,6 @@ router.get("/blogs/all",  (req, res) => {
 // Post Like
 router.post("/like/:id", async (req, res) => {
     try{
-        console.log("like", req.params);
-        console.log("like2",req.body);
         const {clickFor, id} = req.body
         if(clickFor === "like"){
             await PostBlog.updateOne({
@@ -241,7 +244,9 @@ router.post("/comment/:id", async (req, res) => {
         res.status(200).send("Comment Successful")
     }
     catch(err){
-        console.log(err);
+        res.status(500).send({
+            error: "This is server side error"
+        })
     }
 })
 
@@ -252,7 +257,9 @@ router.get("/comment/:id", async (req, res) => {
         res.status(200).json(comment)
     }
     catch(err){
-        console.log(err);
+        res.status(500).send({
+            error: "This is server side error"
+        })
     }
 })
 
@@ -276,7 +283,9 @@ router.put("/views/:id", async (req, res) => {
         })
     }
     catch(err){
-
+        res.status(500).send({
+            error: "This is server side error"
+        })
     }
 })
 
@@ -296,8 +305,9 @@ router.put("/update/:id", async (req, res) => {
         })
     }
     catch(err){
-
-        console.log(err);
+        res.status(500).send({
+            error: "This is server side error"
+        })
     }
 })
 

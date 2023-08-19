@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt")
 const multer = require("multer")
 const path = require("path")
 const dotenv = require("dotenv")
-const {v4: uuidv4} = require("uuid")
+// const {v4: uuidv4} = require("uuid")
 const jwt = require("jsonwebtoken")
 const User = require("../models/usersSchema")
 const url = require("url")
@@ -101,7 +101,9 @@ router.route("/signup").post(upload.single("profileImage"), async (req, res) => 
                 .then((result) => {
                     res.status(200).json({message: "Signup Successful"})
                 }).catch((err) => {
-                    console.log(err);
+                    res.status(500).send({
+                        error: "This is server side error"
+                    })
                 });
             }
         }else{
@@ -175,10 +177,8 @@ router.put("/verify/:id", async(req, res) => {
                 subject: 'Blog Desk id verification code',
                 text:  `Your OTP code is ${otp}`
               };
-              console.log("send",otp);
               transporter.sendMail(mailOptions, function(error, info){
                 if (error) {
-                    console.log(error)
                     res.status(500).json({
                         error: "Email not sent"
                     })
@@ -190,7 +190,6 @@ router.put("/verify/:id", async(req, res) => {
               });
         }else{
             if(req.body.getOtp === otp){
-                console.log("send",otp);
                 const isVerified = true;
                 const updateUserData = {
                     isVerified,
@@ -240,7 +239,6 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
                         const about = req.body.about;
                         const facebook = req.body.facebook;
                         const twitter = req.body.twitter;
-                        // const profileImage = req.file === undefined ? undefined : req.file.path;
                         const ImageCloudinary = req.file === undefined ? undefined : await cloudinary.uploader.upload(req.file.path, {"folder": "blog-desk/users"});
             
                         const updateUserData = {
@@ -291,7 +289,6 @@ router.route("/update/:id").put(upload.single("profileImage"), async (req, res) 
         }
     }
     catch(err){
-        console.log(err);
         res.status(500).json({
             error:"There was a server side error!"
         });
